@@ -115,6 +115,7 @@ public class ScheduleTableAdapter extends BaseTableAdapter<LessonSchedule, Sched
             @Override
             public boolean onDrag(View view, DragEvent dragEvent) {
                 int positionDrop = getAdapterPosition();
+                PassObject<?> srcPassObject = (PassObject<?>) dragEvent.getLocalState();
                 if (mHeaderPositions.contains(positionDrop) || lessonScheduleListener == null)
                     return false;
 
@@ -122,15 +123,16 @@ public class ScheduleTableAdapter extends BaseTableAdapter<LessonSchedule, Sched
                     case DragEvent.ACTION_DRAG_STARTED:
                         break;
                     case DragEvent.ACTION_DRAG_ENTERED:
-                        view.setBackgroundResource(R.color.colorGray);
+                        if (positionDrop != srcPassObject.position)
+                            view.setBackgroundResource(R.color.colorGray);
                         break;
                     case DragEvent.ACTION_DRAG_EXITED:
                         view.setBackgroundResource(R.drawable.bg_stroker_gray);
                         break;
                     case DragEvent.ACTION_DROP:
                         view.setBackgroundResource(R.drawable.bg_stroker_gray);
+                        if (positionDrop == srcPassObject.position) break;
 
-                        PassObject<?> srcPassObject = (PassObject<?>) dragEvent.getLocalState();
                         PassObject<?> desPassObject = new PassObject<>(data, PassObject.Type.LESSON, getAdapterPosition());
 
                         mDialogChoosePeriod = new ChoosePeriodDialogFragment(ScheduleTableAdapter.this, srcPassObject, desPassObject);
@@ -164,11 +166,6 @@ public class ScheduleTableAdapter extends BaseTableAdapter<LessonSchedule, Sched
                     lessonScheduleListener.updateLessonSchedule(ScheduleAction.DELETE, (LessonSchedule) desPassObject.data);
                 }
                 lessonScheduleListener.updateLessonSchedule(ScheduleAction.EDIT, dropSchedule);
-                mDataList.set(positionDrop, dropSchedule);
-                notifyItemChanged(positionDrop);
-
-                mDataList.set(srcPassOject.position, null);
-                notifyItemChanged(srcPassOject.position);
             }
         } else {
             long scheduleId = System.currentTimeMillis();
@@ -179,8 +176,6 @@ public class ScheduleTableAdapter extends BaseTableAdapter<LessonSchedule, Sched
                 lessonScheduleListener.updateLessonSchedule(ScheduleAction.DELETE, (LessonSchedule) desPassObject.data);
             }
             lessonScheduleListener.updateLessonSchedule(ScheduleAction.ADD, dropSchedule);
-            mDataList.set(positionDrop, dropSchedule);
-            notifyItemChanged(positionDrop);
         }
     }
 

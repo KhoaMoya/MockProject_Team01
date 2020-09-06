@@ -92,7 +92,9 @@ public class ScheduleEditorActivity extends BaseScheduleActivity implements View
         if (schedule != null) {
             showWeekSchedule(schedule);
             mCurrentWeekSchedule = schedule;
-            mEditedLessonScheduleList = schedule.getLessonSchedules();
+            mEditedLessonScheduleList = new ArrayList<>(schedule.getLessonSchedules());
+        } else {
+            finish();
         }
     }
 
@@ -152,7 +154,49 @@ public class ScheduleEditorActivity extends BaseScheduleActivity implements View
     @Override
     public void updateLessonSchedule(ScheduleAction action, LessonSchedule schedule) {
         Log.e("Loi", action.name() + " : " + schedule.getId());
+        switch (action) {
+            case ADD:
+                mEditedLessonScheduleList.add(schedule);
+                break;
+            case EDIT:
+                for (int i = 0; i < mEditedLessonScheduleList.size(); i++) {
+                    if (mEditedLessonScheduleList.get(i).getId() == schedule.getId()) {
+                        mEditedLessonScheduleList.set(i, schedule);
+                        break;
+                    }
+                }
+                break;
+            case DELETE:
+                for (int i = 0; i < mEditedLessonScheduleList.size(); i++) {
+                    if (mEditedLessonScheduleList.get(i).getId() == schedule.getId()) {
+                        mEditedLessonScheduleList.get(i).setDay(0);
+                        break;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        reloadLessonSchedulesInWeekFromList();
+    }
 
+    private void reloadLessonSchedulesInWeekFromList() {
+        long startTime, endTime;
+        mCurrentWeekSchedule.getLessonSchedules().clear();
+
+        long startWeek = mCurrentWeekSchedule.getStartDate().getTime();
+        long endWeek = mCurrentWeekSchedule.getEndDate().getTime();
+
+        for (int i = 0; i < mEditedLessonScheduleList.size(); i++) {
+            LessonSchedule schedule = mEditedLessonScheduleList.get(i);
+            startTime = schedule.getStartDate().getTime();
+            endTime = schedule.getEndDate().getTime();
+
+            if (startTime < endWeek && endTime >= startWeek && schedule.getDay() != 0) {
+                mCurrentWeekSchedule.getLessonSchedules().add(schedule);
+            }
+        }
+        scheduleTableAdapter.setScheduleList(mCurrentWeekSchedule);
     }
 
     private void enableEditingState() {

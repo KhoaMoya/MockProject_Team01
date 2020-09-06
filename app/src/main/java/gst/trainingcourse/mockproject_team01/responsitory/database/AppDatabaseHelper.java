@@ -77,8 +77,8 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         long startTime = dates[0].getTime();
         long endTime = dates[1].getTime();
 
-        String sql = "SELECT * FROM " + LESSON_SCHEDULE_TABLE_NAME + " where " + LESSON_SCHEDULE_START_TIME + " >= " + startTime
-                + " AND " + LESSON_SCHEDULE_END_TIME + " < " + endTime;
+        String sql = "SELECT * FROM " + LESSON_SCHEDULE_TABLE_NAME + " where " + LESSON_SCHEDULE_START_TIME + " < " + endTime
+                + " AND " + LESSON_SCHEDULE_END_TIME + " >= " + startTime;
         SQLiteDatabase db = getReadableDatabase();
         ArrayList<LessonSchedule> listSchedule = new ArrayList<>();
 

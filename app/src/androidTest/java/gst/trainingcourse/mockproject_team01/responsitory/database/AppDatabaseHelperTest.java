@@ -2,8 +2,6 @@ package gst.trainingcourse.mockproject_team01.responsitory.database;
 
 import org.junit.Test;
 
-import java.util.Date;
-
 import gst.trainingcourse.mockproject_team01.MyApplication;
 import gst.trainingcourse.mockproject_team01.model.Subject;
 
@@ -12,7 +10,7 @@ public class AppDatabaseHelperTest {
     @Test
     public void testDatabase(){
         AppDatabaseHelper databaseHelper = AppDatabaseHelper.getInstance(MyApplication.getContext());
-        Subject sub = new Subject(new Date().getTime(), "Vật lý");
+        Subject sub = new Subject(System.currentTimeMillis(), "Vật Lý");
         databaseHelper.insertSubject(sub);
 //        int timeId = databaseHelper.insertSubjectTime(time);
 //

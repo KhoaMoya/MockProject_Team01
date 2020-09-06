@@ -81,7 +81,6 @@ public abstract class BaseTableAdapter<O, T extends BaseTableAdapter.BaseItemVie
                 PassObject<O> passObject = getPassObject();
                 ClipData clipData = ClipData.newPlainText("", "");
                 View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
-
                 view.startDragAndDrop(clipData, shadowBuilder, passObject, 0);
                 return true;
             }
