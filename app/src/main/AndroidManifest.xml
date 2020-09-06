@@ -11,7 +11,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ui.editor.ScheduleEditorActivity"
+            android:name=".ui.editsubject.SubjectEditorActivity"
+            android:screenOrientation="landscape" />
+        <activity
+            android:name=".ui.editschedule.ScheduleEditorActivity"
             android:screenOrientation="landscape" />
         <activity
             android:name=".ui.main.MainActivity"

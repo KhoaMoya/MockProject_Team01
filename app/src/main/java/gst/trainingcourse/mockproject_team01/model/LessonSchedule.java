@@ -1,27 +1,30 @@
 package gst.trainingcourse.mockproject_team01.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class LessonSchedule {
-    private int id;
+public class LessonSchedule implements Serializable {
+    private long id;
     private Date startDate;
     private Date endDate;
     private Subject subject;
-    private SubjectTime subjectTime;
+    private int day;
+    private int lesson;
 
-    public LessonSchedule(int id, Date startDate, Date endDate, Subject subject, SubjectTime subjectTime) {
+    public LessonSchedule(long id, Date startDate, Date endDate, Subject subject, int day, int lesson) {
         this.id = id;
         this.startDate = startDate;
         this.endDate = endDate;
         this.subject = subject;
-        this.subjectTime = subjectTime;
+        this.day = day;
+        this.lesson = lesson;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -49,11 +52,19 @@ public class LessonSchedule {
         this.subject = subject;
     }
 
-    public SubjectTime getSubjectTime() {
-        return subjectTime;
+    public int getDay() {
+        return day;
     }
 
-    public void setSubjectTime(SubjectTime subjectTime) {
-        this.subjectTime = subjectTime;
+    public void setDay(int day) {
+        this.day = day;
+    }
+
+    public int getLesson() {
+        return lesson;
+    }
+
+    public void setLesson(int lesson) {
+        this.lesson = lesson;
     }
 }

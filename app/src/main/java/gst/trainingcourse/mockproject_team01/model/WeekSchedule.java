@@ -1,11 +1,12 @@
 package gst.trainingcourse.mockproject_team01.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 
 import gst.trainingcourse.mockproject_team01.utils.TimeUtils;
 
-public class WeekSchedule {
+public class WeekSchedule implements Serializable {
     private Date startDate;
     private Date endDate;
     private ArrayList<LessonSchedule> lessonSchedules;
@@ -49,4 +50,5 @@ public class WeekSchedule {
     public void setName(String name) {
         this.name = name;
     }
+
 }

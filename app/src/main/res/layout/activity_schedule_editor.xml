@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.editor.ScheduleEditorActivity">
+    android:background="@color/colorWhite"
+    tools:context=".ui.editschedule.ScheduleEditorActivity">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/action_bar"
@@ -20,7 +21,7 @@
             android:orientation="horizontal"
             app:layout_constraintStart_toStartOf="parent">
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/img_prev_week"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
@@ -37,7 +38,7 @@
                 android:textStyle="bold"
                 tools:text="Day 05-11/09/2020" />
 
-            <ImageView
+            <ImageButton
                 android:id="@+id/img_next_week"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
@@ -71,69 +72,93 @@
         android:id="@+id/tbl_schedule"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_margin="10dp"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/bg_table"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/guideline"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/action_bar" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="56dp"
-        android:gravity="center"
-        android:text="List of lesson name"
-        android:textColor="@color/colorBlack"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@id/tbl_lesson"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/tbl_lesson"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="0dp"
-        android:layout_height="200dp"
+        android:layout_height="match_parent"
+        android:padding="10dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/guideline"
-        app:layout_constraintTop_toBottomOf="@id/action_bar" />
+        app:layout_constraintStart_toEndOf="@id/guideline">
 
-    <Button
-        android:id="@+id/btn_edit_lesson"
-        android:layout_width="0dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:background="@drawable/bg_pressable_gray_corner8"
-        android:text="Edit lesson name"
-        android:textAllCaps="false"
-        app:layout_constraintEnd_toEndOf="@id/tbl_lesson"
-        app:layout_constraintStart_toStartOf="@id/tbl_lesson"
-        app:layout_constraintTop_toBottomOf="@id/tbl_lesson" />
+        <TextView
+            android:id="@+id/txt_label_list_subject"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_marginBottom="10dp"
+            android:gravity="bottom"
+            android:text="List of lesson name"
+            android:textColor="@color/colorBlack"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/btn_ok"
-        android:layout_width="0dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="5dp"
-        android:background="@drawable/bg_pressable_gray_corner8"
-        android:text="Ok"
-        android:textAllCaps="false"
-        app:layout_constraintEnd_toStartOf="@id/btn_cancel"
-        app:layout_constraintStart_toStartOf="@id/tbl_lesson"
-        app:layout_constraintTop_toBottomOf="@id/btn_edit_lesson" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tbl_lesson"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_table"
+            app:layout_constraintBottom_toTopOf="@id/btn_edit_subject"
+            app:layout_constraintTop_toBottomOf="@id/txt_label_list_subject" />
 
-    <Button
-        android:id="@+id/btn_cancel"
-        android:layout_width="0dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="10dp"
-        android:background="@drawable/bg_pressable_gray_corner8"
-        android:text="Cancel"
-        android:textAllCaps="false"
-        app:layout_constraintEnd_toEndOf="@id/tbl_lesson"
-        app:layout_constraintStart_toEndOf="@id/btn_ok"
-        app:layout_constraintTop_toBottomOf="@id/btn_edit_lesson" />
+        <Button
+            android:id="@+id/btn_edit_subject"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/bg_pressable_gray_corner8"
+            android:text="Edit lesson"
+            android:textAllCaps="false"
+            android:layout_marginEnd="5dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btn_add_subject"
+            app:layout_constraintBottom_toTopOf="@id/btn_ok" />
+
+        <Button
+            android:id="@+id/btn_add_subject"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/bg_pressable_gray_corner8"
+            android:text="Add lesson"
+            android:layout_marginStart="5dp"
+            android:textAllCaps="false"
+            app:layout_constraintStart_toEndOf="@id/btn_edit_subject"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/btn_ok" />
+
+        <Button
+            android:id="@+id/btn_ok"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="5dp"
+            android:background="@drawable/bg_pressable_gray_corner8"
+            android:text="Ok"
+            android:textAllCaps="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btn_cancel"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/btn_cancel"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/bg_pressable_gray_corner8"
+            android:text="Cancel"
+            android:textAllCaps="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btn_ok" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

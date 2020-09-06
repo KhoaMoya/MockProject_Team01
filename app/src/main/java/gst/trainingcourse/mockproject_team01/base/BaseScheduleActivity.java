@@ -3,13 +3,11 @@ package gst.trainingcourse.mockproject_team01.base;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Date;
 
 import gst.trainingcourse.mockproject_team01.adapter.ScheduleTableAdapter;
-import gst.trainingcourse.mockproject_team01.model.LessonSchedule;
 import gst.trainingcourse.mockproject_team01.model.WeekSchedule;
 import gst.trainingcourse.mockproject_team01.responsitory.database.AppDatabaseHelper;
 import gst.trainingcourse.mockproject_team01.utils.TimeUtils;
@@ -23,23 +21,25 @@ import io.reactivex.schedulers.Schedulers;
 
 public abstract class BaseScheduleActivity extends AppCompatActivity {
 
-    protected LessonSchedule currentSchedule;
+    protected WeekSchedule currentSchedule;
     protected AppDatabaseHelper appDatabase;
     protected ScheduleTableAdapter scheduleTableAdapter;
     protected RecyclerView scheduleTable;
     protected TextView txtWeekName;
     protected Disposable disposable;
 
-    protected void initTableSchedule() {
-        int rowHeight = scheduleTable.getHeight() / ScheduleTableAdapter.ROW_NUMBER + 1;
-        scheduleTableAdapter = new ScheduleTableAdapter(this, rowHeight);
-        GridLayoutManager layoutManager = new GridLayoutManager(this, ScheduleTableAdapter.ROW_NUMBER);
-        scheduleTable.setLayoutManager(layoutManager);
+
+    protected void initTableSchedule(boolean isCanDragItem) {
+        int rowHeight = scheduleTable.getHeight() / ScheduleTableAdapter.ROW_NUMBER;
+        scheduleTableAdapter = new ScheduleTableAdapter(this, rowHeight, isCanDragItem, getSupportFragmentManager());
+
+        scheduleTable.setLayoutManager(scheduleTableAdapter.layoutManager);
         scheduleTable.setAdapter(scheduleTableAdapter);
     }
 
     protected void showWeekSchedule(WeekSchedule weekSchedule) {
-        scheduleTableAdapter.setScheduleList(weekSchedule.getLessonSchedules());
+        currentSchedule = weekSchedule;
+        scheduleTableAdapter.setScheduleList(weekSchedule);
         txtWeekName.setText(weekSchedule.getName());
     }
 

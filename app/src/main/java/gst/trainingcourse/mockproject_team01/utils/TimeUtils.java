@@ -5,8 +5,12 @@ import android.annotation.SuppressLint;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class TimeUtils {
+
+    public static String datePattern = "dd/MM/yyyy";
+    public static SimpleDateFormat dateFormat;
 
     public static Date[] getPeriodWeek(Date date) {
         Date[] result = new Date[2];
@@ -72,7 +76,7 @@ public class TimeUtils {
     }
 
     @SuppressLint("DefaultLocale")
-    public static String getWeekName(Date startDate, Date endDate){
+    public static String getWeekName(Date startDate, Date endDate) {
         String name = "";
         SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy");
         String stringStartDate = df.format(startDate);
@@ -88,13 +92,44 @@ public class TimeUtils {
         int endMonth = calendar.get(Calendar.MONTH) + 1;
         int endYear = calendar.get(Calendar.YEAR);
 
-        if(startYear!=endYear){
-            name = String.format("Day " + stringStartDate + " - " + "%02d/%02d/%d", endDay-1, endMonth, endYear);
-        } else if(startMonth != endMonth){
-            name = String.format("Day %02d/%02d-%02d/%02d/%d", startDay, startMonth, endDay-1, endMonth, endYear);
+        if (startYear != endYear) {
+            name = String.format("Day " + stringStartDate + " - " + "%02d/%02d/%d", endDay - 1, endMonth, endYear);
+        } else if (startMonth != endMonth) {
+            name = String.format("Day %02d/%02d-%02d/%02d/%d", startDay, startMonth, endDay - 1, endMonth, endYear);
         } else {
-            name = String.format("Day %02d-%02d/%02d/%d", startDay, endDay-1, endMonth, endYear);
+            name = String.format("Day %02d-%02d/%02d/%d", startDay, endDay - 1, endMonth, endYear);
         }
         return name;
     }
+
+    public static Date[] getPeriodDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        Date startDate = calendar.getTime();
+
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        Date endDate = calendar.getTime();
+        return new Date[]{startDate, endDate};
+    }
+
+    public static String convertDatetoString(Date date) {
+        if (dateFormat == null) dateFormat = new SimpleDateFormat(datePattern, Locale.getDefault());
+        return dateFormat.format(date);
+    }
+
+    public static Date convertStringToDate(String string) {
+        if (dateFormat == null) dateFormat = new SimpleDateFormat(datePattern, Locale.getDefault());
+        try {
+            return dateFormat.parse(string);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new Date();
+    }
+
 }

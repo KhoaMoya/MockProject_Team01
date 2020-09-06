@@ -1,19 +1,21 @@
 package gst.trainingcourse.mockproject_team01.model;
 
-public class Subject {
-    private int id;
+import java.io.Serializable;
+
+public class Subject implements Serializable {
+    private long id;
     private String name;
 
-    public Subject(int id, String name) {
+    public Subject(long id, String name) {
         this.id = id;
         this.name = name;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
