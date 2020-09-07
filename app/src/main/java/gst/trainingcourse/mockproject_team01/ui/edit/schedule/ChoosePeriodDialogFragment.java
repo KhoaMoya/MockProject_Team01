@@ -1,4 +1,4 @@
-package gst.trainingcourse.mockproject_team01.ui.editschedule;
+package gst.trainingcourse.mockproject_team01.ui.edit.schedule;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;

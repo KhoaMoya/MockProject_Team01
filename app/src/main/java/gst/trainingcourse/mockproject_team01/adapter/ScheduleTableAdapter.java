@@ -19,9 +19,10 @@ import gst.trainingcourse.mockproject_team01.base.BaseTableAdapter;
 import gst.trainingcourse.mockproject_team01.model.LessonSchedule;
 import gst.trainingcourse.mockproject_team01.model.PassObject;
 import gst.trainingcourse.mockproject_team01.model.ScheduleAction;
+import gst.trainingcourse.mockproject_team01.model.ScheduleTracker;
 import gst.trainingcourse.mockproject_team01.model.Subject;
 import gst.trainingcourse.mockproject_team01.model.WeekSchedule;
-import gst.trainingcourse.mockproject_team01.ui.editschedule.ChoosePeriodDialogFragment;
+import gst.trainingcourse.mockproject_team01.ui.edit.schedule.ChoosePeriodDialogFragment;
 
 public class ScheduleTableAdapter extends BaseTableAdapter<LessonSchedule, ScheduleTableAdapter.LessonItemViewHolder> {
 
@@ -163,9 +164,9 @@ public class ScheduleTableAdapter extends BaseTableAdapter<LessonSchedule, Sched
 
             if (positionDrop != srcPassOject.position) {
                 if (desPassObject.data != null) {
-                    lessonScheduleListener.updateLessonSchedule(ScheduleAction.DELETE, (LessonSchedule) desPassObject.data);
+                    lessonScheduleListener.updateLessonSchedule(new ScheduleTracker(ScheduleAction.DELETE, (LessonSchedule) desPassObject.data));
                 }
-                lessonScheduleListener.updateLessonSchedule(ScheduleAction.EDIT, dropSchedule);
+                lessonScheduleListener.updateLessonSchedule(new ScheduleTracker(ScheduleAction.EDIT, dropSchedule));
             }
         } else {
             long scheduleId = System.currentTimeMillis();
@@ -173,9 +174,9 @@ public class ScheduleTableAdapter extends BaseTableAdapter<LessonSchedule, Sched
             LessonSchedule dropSchedule = new LessonSchedule(scheduleId, selectedDates[0], selectedDates[1], subject, day, lesson);
 
             if (desPassObject.data != null) {
-                lessonScheduleListener.updateLessonSchedule(ScheduleAction.DELETE, (LessonSchedule) desPassObject.data);
+                lessonScheduleListener.updateLessonSchedule(new ScheduleTracker(ScheduleAction.DELETE, (LessonSchedule) desPassObject.data));
             }
-            lessonScheduleListener.updateLessonSchedule(ScheduleAction.ADD, dropSchedule);
+            lessonScheduleListener.updateLessonSchedule(new ScheduleTracker(ScheduleAction.ADD, dropSchedule));
         }
     }
 

@@ -10,11 +10,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".ui.edit.subject.AddSubjectActivity"></activity>
         <activity
-            android:name=".ui.editsubject.SubjectEditorActivity"
+            android:name=".ui.edit.subject.RenameSubjectActivity"
             android:screenOrientation="landscape" />
         <activity
-            android:name=".ui.editschedule.ScheduleEditorActivity"
+            android:name=".ui.edit.schedule.EditScheduleActivity"
             android:screenOrientation="landscape" />
         <activity
             android:name=".ui.main.MainActivity"

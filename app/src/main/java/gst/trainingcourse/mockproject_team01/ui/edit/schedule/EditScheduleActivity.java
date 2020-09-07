@@ -1,12 +1,12 @@
-package gst.trainingcourse.mockproject_team01.ui.editschedule;
+package gst.trainingcourse.mockproject_team01.ui.edit.schedule;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,34 +19,42 @@ import gst.trainingcourse.mockproject_team01.adapter.SubjectTableAdapter;
 import gst.trainingcourse.mockproject_team01.base.BaseScheduleActivity;
 import gst.trainingcourse.mockproject_team01.model.LessonSchedule;
 import gst.trainingcourse.mockproject_team01.model.ScheduleAction;
+import gst.trainingcourse.mockproject_team01.model.ScheduleTracker;
 import gst.trainingcourse.mockproject_team01.model.Subject;
 import gst.trainingcourse.mockproject_team01.model.WeekSchedule;
-import gst.trainingcourse.mockproject_team01.ui.editsubject.SubjectEditorActivity;
+import gst.trainingcourse.mockproject_team01.ui.edit.subject.AddSubjectActivity;
+import gst.trainingcourse.mockproject_team01.ui.edit.subject.RenameSubjectActivity;
 import gst.trainingcourse.mockproject_team01.ui.main.MainActivity;
 import io.reactivex.SingleObserver;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
-public class ScheduleEditorActivity extends BaseScheduleActivity implements View.OnClickListener
+public class EditScheduleActivity extends BaseScheduleActivity implements View.OnClickListener
         , OnClickItemListener<Subject>
         , LessonScheduleListener {
 
+    public final static String RENAME_SUBJECT_KEY = "edit subject key";
+    public final static int EDIT_SUBJECT_REQUEST_CODE = 10;
+    public final static String ADD_SUBJECT_KEY = "add subject key";
+    public final static int ADD_SUBJECT_REQUEST_CODE = 12;
+
     private ImageView imgTrash, btnPrevWeek, btnNextWeek;
     private RecyclerView subjectTable;
-    private Button btnEditSubjectName, btnOk, btnCancel;
+    private Button btnEditSubjectName, btnOk, btnCancel, btnAddSubject;
     private SubjectTableAdapter mSubjectTableAdapter;
 
-    private ArrayList<LessonSchedule> mEditedLessonScheduleList;
+    private ArrayList<ScheduleTracker> mScheduleTrackerList;
     private WeekSchedule mCurrentWeekSchedule;
     private ArrayList<Subject> mCurrentSubjectList;
     private CompositeDisposable mDisposable;
+    private ArrayList<Integer> mEditedSubjectIndexList;
 
     private boolean isEditingSubjectName = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_schedule_editor);
+        setContentView(R.layout.activity_edit_schedule);
 
         inits();
         initViews();
@@ -56,8 +64,9 @@ public class ScheduleEditorActivity extends BaseScheduleActivity implements View
 
     private void inits() {
         mDisposable = new CompositeDisposable();
-        mEditedLessonScheduleList = new ArrayList<>();
+        mScheduleTrackerList = new ArrayList<>();
         mCurrentSubjectList = new ArrayList<>();
+        mEditedSubjectIndexList = new ArrayList<>();
     }
 
     private void loadDatas() {
@@ -65,7 +74,7 @@ public class ScheduleEditorActivity extends BaseScheduleActivity implements View
             @Override
             public void run() {
                 initTableSchedule(true);
-                scheduleTableAdapter.setLessonScheduleListener(ScheduleEditorActivity.this);
+                scheduleTableAdapter.setLessonScheduleListener(EditScheduleActivity.this);
                 getScheduleFromIntent();
             }
         });
@@ -88,11 +97,13 @@ public class ScheduleEditorActivity extends BaseScheduleActivity implements View
     }
 
     private void getScheduleFromIntent() {
-        WeekSchedule schedule = (WeekSchedule) getIntent().getSerializableExtra(MainActivity.EDIT_SCHECULE_KEY);
-        if (schedule != null) {
-            showWeekSchedule(schedule);
-            mCurrentWeekSchedule = schedule;
-            mEditedLessonScheduleList = new ArrayList<>(schedule.getLessonSchedules());
+        WeekSchedule weekSchedule = (WeekSchedule) getIntent().getSerializableExtra(MainActivity.EDIT_SCHECULE_KEY);
+        if (weekSchedule != null) {
+            showWeekSchedule(weekSchedule);
+            mCurrentWeekSchedule = weekSchedule;
+            for (LessonSchedule sch : weekSchedule.getLessonSchedules()) {
+                mScheduleTrackerList.add(new ScheduleTracker(ScheduleAction.NONE, sch));
+            }
         } else {
             finish();
         }
@@ -124,9 +135,14 @@ public class ScheduleEditorActivity extends BaseScheduleActivity implements View
             case R.id.btn_edit_subject:
                 onClickBtnEditLesson();
                 break;
+            case R.id.btn_add_subject:
+                Intent addSubjectIntent = new Intent(EditScheduleActivity.this, AddSubjectActivity.class);
+                startActivityForResult(addSubjectIntent, ADD_SUBJECT_REQUEST_CODE);
+                break;
             case R.id.btn_ok:
                 break;
             case R.id.btn_cancel:
+                finish();
                 break;
         }
     }
@@ -149,54 +165,43 @@ public class ScheduleEditorActivity extends BaseScheduleActivity implements View
         btnEditSubjectName.setOnClickListener(this);
         btnOk.setOnClickListener(this);
         btnCancel.setOnClickListener(this);
+        btnAddSubject.setOnClickListener(this);
     }
 
     @Override
-    public void updateLessonSchedule(ScheduleAction action, LessonSchedule schedule) {
-        Log.e("Loi", action.name() + " : " + schedule.getId());
-        switch (action) {
-            case ADD:
-                mEditedLessonScheduleList.add(schedule);
-                break;
-            case EDIT:
-                for (int i = 0; i < mEditedLessonScheduleList.size(); i++) {
-                    if (mEditedLessonScheduleList.get(i).getId() == schedule.getId()) {
-                        mEditedLessonScheduleList.set(i, schedule);
-                        break;
-                    }
+    public void updateLessonSchedule(ScheduleTracker tracker) {
+        if (tracker.action == ScheduleAction.ADD) {
+            mScheduleTrackerList.add(tracker);
+        } else if (tracker.action == ScheduleAction.EDIT || tracker.action == ScheduleAction.DELETE) {
+            for (int i = 0; i < mScheduleTrackerList.size(); i++) {
+                if (mScheduleTrackerList.get(i).schedule.getId() == tracker.schedule.getId()) {
+                    mScheduleTrackerList.set(i, tracker);
+                    break;
                 }
-                break;
-            case DELETE:
-                for (int i = 0; i < mEditedLessonScheduleList.size(); i++) {
-                    if (mEditedLessonScheduleList.get(i).getId() == schedule.getId()) {
-                        mEditedLessonScheduleList.get(i).setDay(0);
-                        break;
-                    }
-                }
-                break;
-            default:
-                break;
+            }
         }
-        reloadLessonSchedulesInWeekFromList();
+        reloadLessonSchedulesInWeekFromTrackerList();
+        scheduleTableAdapter.setScheduleList(mCurrentWeekSchedule);
     }
 
-    private void reloadLessonSchedulesInWeekFromList() {
+    private void reloadLessonSchedulesInWeekFromTrackerList() {
         long startTime, endTime;
         mCurrentWeekSchedule.getLessonSchedules().clear();
 
         long startWeek = mCurrentWeekSchedule.getStartDate().getTime();
         long endWeek = mCurrentWeekSchedule.getEndDate().getTime();
 
-        for (int i = 0; i < mEditedLessonScheduleList.size(); i++) {
-            LessonSchedule schedule = mEditedLessonScheduleList.get(i);
+        for (int i = 0; i < mScheduleTrackerList.size(); i++) {
+            if (mScheduleTrackerList.get(i).action == ScheduleAction.DELETE) continue;
+
+            LessonSchedule schedule = mScheduleTrackerList.get(i).schedule;
             startTime = schedule.getStartDate().getTime();
             endTime = schedule.getEndDate().getTime();
 
-            if (startTime < endWeek && endTime >= startWeek && schedule.getDay() != 0) {
+            if (startTime < endWeek && endTime >= startWeek) {
                 mCurrentWeekSchedule.getLessonSchedules().add(schedule);
             }
         }
-        scheduleTableAdapter.setScheduleList(mCurrentWeekSchedule);
     }
 
     private void enableEditingState() {
@@ -215,8 +220,52 @@ public class ScheduleEditorActivity extends BaseScheduleActivity implements View
 
     @Override
     public void onClickItem(Subject subject) {
-        Intent intent = new Intent(this, SubjectEditorActivity.class);
-        startActivity(intent);
+        Intent intent = new Intent(this, RenameSubjectActivity.class);
+        intent.putExtra(RENAME_SUBJECT_KEY, subject);
+        startActivityForResult(intent, EDIT_SUBJECT_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK && data != null) {
+            if (requestCode == EDIT_SUBJECT_REQUEST_CODE) {
+                Subject resultSubject = (Subject) data.getSerializableExtra(RENAME_SUBJECT_KEY);
+                int index = -1;
+                if (resultSubject != null) {
+                    for (int i = 0; i < mCurrentSubjectList.size(); i++) {
+                        if (mCurrentSubjectList.get(i).getId() == resultSubject.getId()) {
+                            index = i;
+                            break;
+                        }
+                    }
+                    if (index != -1) {
+                        mEditedSubjectIndexList.add(index);
+                        mCurrentSubjectList.set(index, resultSubject);
+
+                        updateLessonScheduleListBySubjectList();
+                    }
+                }
+            } else if (requestCode == ADD_SUBJECT_REQUEST_CODE) {
+                Subject newSubject = (Subject) data.getSerializableExtra(ADD_SUBJECT_KEY);
+                mCurrentSubjectList.add(newSubject);
+            }
+        }
+    }
+
+    private void updateLessonScheduleListBySubjectList() {
+        for (int i = 0; i < mEditedSubjectIndexList.size(); i++) {
+            for (int j = 0; j < mScheduleTrackerList.size(); j++) {
+                long idEditedSubject = mCurrentSubjectList.get(i).getId();
+                if (mScheduleTrackerList.get(j).schedule.getSubject().getId() == idEditedSubject) {
+                    mScheduleTrackerList.get(j).schedule.setSubject(mCurrentSubjectList.get(i));
+                    reloadLessonSchedulesInWeekFromTrackerList();
+                    scheduleTableAdapter.setScheduleList(mCurrentWeekSchedule);
+                    break;
+                }
+            }
+        }
     }
 
     private void setEnableButton(boolean isEnable) {
@@ -224,6 +273,7 @@ public class ScheduleEditorActivity extends BaseScheduleActivity implements View
         btnCancel.setEnabled(isEnable);
         btnPrevWeek.setEnabled(isEnable);
         btnNextWeek.setEnabled(isEnable);
+        btnAddSubject.setEnabled(isEnable);
     }
 
     private void initViews() {
@@ -235,6 +285,7 @@ public class ScheduleEditorActivity extends BaseScheduleActivity implements View
         imgTrash = findViewById(R.id.img_trash);
         btnOk = findViewById(R.id.btn_ok);
         btnCancel = findViewById(R.id.btn_cancel);
+        btnAddSubject = findViewById(R.id.btn_add_subject);
         btnEditSubjectName = findViewById(R.id.btn_edit_subject);
     }
 

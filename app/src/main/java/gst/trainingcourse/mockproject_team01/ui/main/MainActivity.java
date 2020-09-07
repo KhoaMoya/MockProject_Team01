@@ -11,7 +11,7 @@ import java.util.Date;
 
 import gst.trainingcourse.mockproject_team01.R;
 import gst.trainingcourse.mockproject_team01.base.BaseScheduleActivity;
-import gst.trainingcourse.mockproject_team01.ui.editschedule.ScheduleEditorActivity;
+import gst.trainingcourse.mockproject_team01.ui.edit.schedule.EditScheduleActivity;
 import gst.trainingcourse.mockproject_team01.utils.TimeUtils;
 
 public class MainActivity extends BaseScheduleActivity implements View.OnClickListener{
@@ -62,7 +62,7 @@ public class MainActivity extends BaseScheduleActivity implements View.OnClickLi
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.btn_edit_schedule) {
-            Intent intent = new Intent(MainActivity.this, ScheduleEditorActivity.class);
+            Intent intent = new Intent(MainActivity.this, EditScheduleActivity.class);
             intent.putExtra(EDIT_SCHECULE_KEY, currentSchedule);
             startActivityForResult(intent, EDIT_SCHEDULE_REQUEST_CODE);
         } else if (view.getId() == R.id.btn_change_week) {

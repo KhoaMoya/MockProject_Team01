@@ -1,8 +1,7 @@
 package gst.trainingcourse.mockproject_team01.adapter;
 
-import gst.trainingcourse.mockproject_team01.model.LessonSchedule;
-import gst.trainingcourse.mockproject_team01.model.ScheduleAction;
+import gst.trainingcourse.mockproject_team01.model.ScheduleTracker;
 
 public interface LessonScheduleListener {
-    void updateLessonSchedule(ScheduleAction action, LessonSchedule schedule);
+    void updateLessonSchedule(ScheduleTracker tracker);
 }
