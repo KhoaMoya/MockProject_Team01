@@ -18,10 +18,10 @@ import gst.trainingcourse.mockproject_team01.R;
 import gst.trainingcourse.mockproject_team01.base.BaseTableAdapter;
 import gst.trainingcourse.mockproject_team01.model.LessonSchedule;
 import gst.trainingcourse.mockproject_team01.model.PassObject;
-import gst.trainingcourse.mockproject_team01.model.ScheduleAction;
-import gst.trainingcourse.mockproject_team01.model.ScheduleTracker;
 import gst.trainingcourse.mockproject_team01.model.Subject;
 import gst.trainingcourse.mockproject_team01.model.WeekSchedule;
+import gst.trainingcourse.mockproject_team01.model.tracker.EditAction;
+import gst.trainingcourse.mockproject_team01.model.tracker.ScheduleTracker;
 import gst.trainingcourse.mockproject_team01.ui.edit.schedule.ChoosePeriodDialogFragment;
 
 public class ScheduleTableAdapter extends BaseTableAdapter<LessonSchedule, ScheduleTableAdapter.LessonItemViewHolder> {
@@ -44,7 +44,7 @@ public class ScheduleTableAdapter extends BaseTableAdapter<LessonSchedule, Sched
         mDataList = new ArrayList<>();
     }
 
-    public void setScheduleList(WeekSchedule weekSchedule) {
+    public void setWeekSchedule(WeekSchedule weekSchedule) {
         this.currentWeekSchedule = weekSchedule;
         mDataList.clear();
         for (int i = 0; i < (COLUMN_NUMBER * ROW_NUMBER); i++) {
@@ -150,33 +150,33 @@ public class ScheduleTableAdapter extends BaseTableAdapter<LessonSchedule, Sched
         }
     }
 
-    public void handleEditingLessonSchedule(PassObject<?> srcPassOject, PassObject<?> desPassObject, Date[] selectedDates) {
+    public void handleEditingLessonSchedule(PassObject<?> srcPassObject, PassObject<?> desPassObject, Date[] selectedDates) {
         int positionDrop = desPassObject.position;
         int lesson = positionDrop / COLUMN_NUMBER;
         int day = positionDrop % COLUMN_NUMBER + 1;
 
-        if (srcPassOject.type == PassObject.Type.LESSON) {
-            LessonSchedule dropSchedule = (LessonSchedule) srcPassOject.data;
+        if (srcPassObject.type == PassObject.Type.LESSON) {
+            LessonSchedule dropSchedule = (LessonSchedule) srcPassObject.data;
             dropSchedule.setDay(day);
             dropSchedule.setLesson(lesson);
             dropSchedule.setStartDate(selectedDates[0]);
             dropSchedule.setEndDate(selectedDates[1]);
 
-            if (positionDrop != srcPassOject.position) {
+            if (positionDrop != srcPassObject.position) {
                 if (desPassObject.data != null) {
-                    lessonScheduleListener.updateLessonSchedule(new ScheduleTracker(ScheduleAction.DELETE, (LessonSchedule) desPassObject.data));
+                    lessonScheduleListener.updateScheduleTracker(new ScheduleTracker(EditAction.DELETE, (LessonSchedule) desPassObject.data));
                 }
-                lessonScheduleListener.updateLessonSchedule(new ScheduleTracker(ScheduleAction.EDIT, dropSchedule));
+                lessonScheduleListener.updateScheduleTracker(new ScheduleTracker(EditAction.EDIT, dropSchedule));
             }
         } else {
             long scheduleId = System.currentTimeMillis();
-            Subject subject = (Subject) srcPassOject.data;
+            Subject subject = (Subject) srcPassObject.data;
             LessonSchedule dropSchedule = new LessonSchedule(scheduleId, selectedDates[0], selectedDates[1], subject, day, lesson);
 
             if (desPassObject.data != null) {
-                lessonScheduleListener.updateLessonSchedule(new ScheduleTracker(ScheduleAction.DELETE, (LessonSchedule) desPassObject.data));
+                lessonScheduleListener.updateScheduleTracker(new ScheduleTracker(EditAction.DELETE, (LessonSchedule) desPassObject.data));
             }
-            lessonScheduleListener.updateLessonSchedule(new ScheduleTracker(ScheduleAction.ADD, dropSchedule));
+            lessonScheduleListener.updateScheduleTracker(new ScheduleTracker(EditAction.ADD, dropSchedule));
         }
     }
 

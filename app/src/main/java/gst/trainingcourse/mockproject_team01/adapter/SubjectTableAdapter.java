@@ -87,6 +87,7 @@ public class SubjectTableAdapter extends BaseTableAdapter<Subject, SubjectTableA
 
         @Override
         public PassObject<Subject> getPassObject() {
+            Subject subject = (Subject) data;
             return new PassObject<>((Subject) data, PassObject.Type.SUBJECT, getAdapterPosition());
         }
     }

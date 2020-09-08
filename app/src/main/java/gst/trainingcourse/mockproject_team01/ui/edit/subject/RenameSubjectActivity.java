@@ -47,5 +47,6 @@ public class RenameSubjectActivity extends BaseEditSubjectActivity {
         Intent resultIntent = new Intent();
         resultIntent.putExtra(EditScheduleActivity.RENAME_SUBJECT_KEY, editSubject);
         setResult(RESULT_OK, resultIntent);
+        finish();
     }
 }

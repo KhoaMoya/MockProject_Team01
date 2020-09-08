@@ -31,5 +31,6 @@ public class AddSubjectActivity extends BaseEditSubjectActivity {
         Intent resultIntent = new Intent();
         resultIntent.putExtra(EditScheduleActivity.ADD_SUBJECT_KEY, newSubject);
         setResult(RESULT_OK, resultIntent);
+        finish();
     }
 }

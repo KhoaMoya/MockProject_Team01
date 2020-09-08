@@ -12,6 +12,13 @@ public class WeekSchedule implements Serializable {
     private ArrayList<LessonSchedule> lessonSchedules;
     private String name;
 
+    public WeekSchedule(Date startDate, Date endDate) {
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.name = TimeUtils.getWeekName(startDate, endDate);
+        this.lessonSchedules = new ArrayList<>();
+    }
+
     public WeekSchedule(Date[] dates, ArrayList<LessonSchedule> lessonSchedules) {
         this.startDate = dates[0];
         this.endDate = dates[1];

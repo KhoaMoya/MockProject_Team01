@@ -37,6 +37,7 @@ public class MainActivity extends BaseScheduleActivity implements View.OnClickLi
         txtWeekName = findViewById(R.id.txt_week_name);
         btnChangeWeek = findViewById(R.id.btn_change_week);
         btnEditSchedule = findViewById(R.id.btn_edit_schedule);
+        progressBarLoading = findViewById(R.id.pb_loading);
     }
 
     private void initActions() {
@@ -63,7 +64,7 @@ public class MainActivity extends BaseScheduleActivity implements View.OnClickLi
     public void onClick(View view) {
         if (view.getId() == R.id.btn_edit_schedule) {
             Intent intent = new Intent(MainActivity.this, EditScheduleActivity.class);
-            intent.putExtra(EDIT_SCHECULE_KEY, currentSchedule);
+            intent.putExtra(EDIT_SCHECULE_KEY, currentWeekSchedule);
             startActivityForResult(intent, EDIT_SCHEDULE_REQUEST_CODE);
         } else if (view.getId() == R.id.btn_change_week) {
 
@@ -74,4 +75,6 @@ public class MainActivity extends BaseScheduleActivity implements View.OnClickLi
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
     }
+
+    // TODO handle change week
 }

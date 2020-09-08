@@ -1,5 +1,7 @@
 package gst.trainingcourse.mockproject_team01.base;
 
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,13 +23,13 @@ import io.reactivex.schedulers.Schedulers;
 
 public abstract class BaseScheduleActivity extends AppCompatActivity {
 
-    protected WeekSchedule currentSchedule;
+    public WeekSchedule currentWeekSchedule;
     protected AppDatabaseHelper appDatabase;
-    protected ScheduleTableAdapter scheduleTableAdapter;
+    public ScheduleTableAdapter scheduleTableAdapter;
     protected RecyclerView scheduleTable;
-    protected TextView txtWeekName;
+    public TextView txtWeekName;
     protected Disposable disposable;
-
+    protected ProgressBar progressBarLoading;
 
     protected void initTableSchedule(boolean isCanDragItem) {
         int rowHeight = scheduleTable.getHeight() / ScheduleTableAdapter.ROW_NUMBER;
@@ -37,11 +39,6 @@ public abstract class BaseScheduleActivity extends AppCompatActivity {
         scheduleTable.setAdapter(scheduleTableAdapter);
     }
 
-    protected void showWeekSchedule(WeekSchedule weekSchedule) {
-        currentSchedule = weekSchedule;
-        scheduleTableAdapter.setScheduleList(weekSchedule);
-        txtWeekName.setText(weekSchedule.getName());
-    }
 
     protected Single<WeekSchedule> getWeekSchedule(Date[] dates) {
         final Date[] periodWeek;
@@ -60,6 +57,20 @@ public abstract class BaseScheduleActivity extends AppCompatActivity {
             }
         }).observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io());
+    }
+
+    public void showWeekSchedule(WeekSchedule weekSchedule) {
+        currentWeekSchedule = weekSchedule;
+        scheduleTableAdapter.setWeekSchedule(weekSchedule);
+        txtWeekName.setText(weekSchedule.getName());
+    }
+
+    public void showLoading() {
+        if (progressBarLoading != null) progressBarLoading.setVisibility(View.VISIBLE);
+    }
+
+    public void hideLoading() {
+        if (progressBarLoading != null) progressBarLoading.setVisibility(View.GONE);
     }
 
     protected SingleObserver<WeekSchedule> weekScheduleObserver = new SingleObserver<WeekSchedule>() {

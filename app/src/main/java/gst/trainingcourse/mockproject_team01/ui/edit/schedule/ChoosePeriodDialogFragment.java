@@ -111,14 +111,13 @@ public class ChoosePeriodDialogFragment extends DialogFragment implements View.O
     @Override
     public void onClick(View view) {
         int year, month, day;
-        DatePickerDialog datePickerDialog;
         switch (view.getId()) {
             case R.id.txt_start_date:
                 calendar.setTime(startDate);
                 year = calendar.get(Calendar.YEAR);
                 month = calendar.get(Calendar.MONTH);
                 day = calendar.get(Calendar.DAY_OF_MONTH);
-                datePickerDialog = new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
+                new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker datePicker, int year, int month, int day) {
                         calendar.set(year, month, day);
@@ -130,15 +129,14 @@ public class ChoosePeriodDialogFragment extends DialogFragment implements View.O
                         }
                         displayStartDateAndEndDate();
                     }
-                }, year, month, day);
-                datePickerDialog.show();
+                }, year, month, day).show();
                 break;
             case R.id.txt_end_date:
                 calendar.setTime(endDate);
                 year = calendar.get(Calendar.YEAR);
                 month = calendar.get(Calendar.MONTH);
                 day = calendar.get(Calendar.DAY_OF_MONTH);
-                datePickerDialog = new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
+                new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker datePicker, int year, int month, int day) {
                         calendar.set(year, month, day);
@@ -150,8 +148,7 @@ public class ChoosePeriodDialogFragment extends DialogFragment implements View.O
                             displayStartDateAndEndDate();
                         }
                     }
-                }, year, month, day);
-                datePickerDialog.show();
+                }, year, month, day).show();
                 break;
             case R.id.btn_cancel:
                 dismiss();

@@ -122,14 +122,20 @@ public class TimeUtils {
         return dateFormat.format(date);
     }
 
-    public static Date convertStringToDate(String string) {
-        if (dateFormat == null) dateFormat = new SimpleDateFormat(datePattern, Locale.getDefault());
-        try {
-            return dateFormat.parse(string);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return new Date();
+    public static int[] getYearMonthDay(Date date) {
+        int[] times = new int[3];
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        times[0] = calendar.get(Calendar.YEAR);
+        times[1] = calendar.get(Calendar.MONTH);
+        times[2] = calendar.get(Calendar.DAY_OF_MONTH);
+        return times;
+    }
+
+    public static Date[] getPeriodWeek(int year, int month, int day) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year, month, day);
+        return getPeriodWeek(calendar.getTime());
     }
 
 }
