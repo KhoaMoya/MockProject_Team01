@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,6 +12,7 @@ import java.util.Date;
 import gst.trainingcourse.mockproject_team01.model.LessonSchedule;
 import gst.trainingcourse.mockproject_team01.model.Subject;
 import gst.trainingcourse.mockproject_team01.model.WeekSchedule;
+import gst.trainingcourse.mockproject_team01.utils.TimeUtils;
 
 public class AppDatabaseHelper extends SQLiteOpenHelper {
 
@@ -96,9 +96,10 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                     day = cursor.getInt(cursor.getColumnIndex(LESSON_SCHEDULE_DAY));
                     lesson = cursor.getInt(cursor.getColumnIndex(LESSON_SCHEDULE_LESSON));
 
-                    subject = getSuject(subId);
-
-                    listSchedule.add(new LessonSchedule(id, new Date(sTime), new Date(eTime), subject, day, lesson));
+                    if (TimeUtils.dayOf(sTime) <= day && TimeUtils.dayOf(eTime) >= day) {
+                        subject = getSubject(subId);
+                        listSchedule.add(new LessonSchedule(id, new Date(sTime), new Date(eTime), subject, day, lesson));
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -108,7 +109,7 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         return listSchedule;
     }
 
-    public Subject getSuject(long id) {
+    public Subject getSubject(long id) {
         SQLiteDatabase db = getReadableDatabase();
         String sql = "SELECT * FROM " + SUBJECT_TABLE_NAME + " WHERE " + SUBJECT_ID + " = " + id;
         Cursor cursor = db.rawQuery(sql, null);
@@ -121,8 +122,8 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         return null;
     }
 
-    public void insertSubject(Subject subject) {
-        if (!checkIsDataAlready(SUBJECT_TABLE_NAME, SUBJECT_ID, String.valueOf(subject.getId()))) {
+    public void insertSubject(Subject subject) throws Exception {
+        if (checkIsDataAlready(SUBJECT_TABLE_NAME, SUBJECT_ID, String.valueOf(subject.getId()))) {
             SQLiteDatabase db = getWritableDatabase();
             try {
                 ContentValues values = new ContentValues();
@@ -130,20 +131,20 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                 values.put(SUBJECT_NAME, subject.getName());
                 db.insert(SUBJECT_TABLE_NAME, null, values);
             } catch (Exception e) {
-                e.printStackTrace();
+                db.close();
+                throw new Exception(e.getMessage());
             } finally {
                 db.close();
             }
         }
     }
 
-    public void insertLessionSchedule(LessonSchedule schedule) {
-        if (!checkIsDataAlready(LESSON_SCHEDULE_TABLE_NAME, LESSON_SCHEDULE_ID, String.valueOf(schedule.getId()))) {
+    public void insertLessionSchedule(LessonSchedule schedule) throws Exception {
+        if (checkIsDataAlready(LESSON_SCHEDULE_TABLE_NAME, LESSON_SCHEDULE_ID, String.valueOf(schedule.getId()))) {
             SQLiteDatabase db = getWritableDatabase();
             try {
                 ContentValues values = new ContentValues();
                 values.put(LESSON_SCHEDULE_ID, schedule.getId());
-                Log.e("Loi", "subject : " + schedule.getSubject().getId());
                 values.put(LESSON_SCHEDULE_SUBJECT_ID, schedule.getSubject().getId());
                 values.put(LESSON_SCHEDULE_START_TIME, schedule.getStartDate().getTime());
                 values.put(LESSON_SCHEDULE_END_TIME, schedule.getEndDate().getTime());
@@ -151,7 +152,8 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                 values.put(LESSON_SCHEDULE_LESSON, schedule.getLesson());
                 db.insert(LESSON_SCHEDULE_TABLE_NAME, null, values);
             } catch (Exception e) {
-                e.printStackTrace();
+                db.close();
+                throw new Exception(e.getMessage());
             } finally {
                 db.close();
             }
@@ -176,31 +178,33 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
         return list;
     }
 
-    public void updateSubject(Subject subject) {
+    public void updateSubject(Subject subject) throws Exception {
         SQLiteDatabase db = getWritableDatabase();
         try {
             ContentValues values = new ContentValues();
             values.put(SUBJECT_NAME, subject.getName());
             db.update(SUBJECT_TABLE_NAME, values, SUBJECT_ID + " = ?", new String[]{String.valueOf(subject.getId())});
         } catch (Exception e) {
-            e.printStackTrace();
+            db.close();
+            throw new Exception(e.getMessage());
         } finally {
             db.close();
         }
     }
 
-    public void deleteSubject(Subject subject) {
+    public void deleteSubject(Subject subject) throws Exception {
         SQLiteDatabase db = getWritableDatabase();
         try {
             db.delete(SUBJECT_TABLE_NAME, SUBJECT_ID + " = ?", new String[]{String.valueOf(subject.getId())});
         } catch (Exception e) {
-            e.printStackTrace();
+            db.close();
+            throw new Exception(e.getMessage());
         } finally {
             db.close();
         }
     }
 
-    public void updateSchedule(LessonSchedule schedule) {
+    public void updateSchedule(LessonSchedule schedule) throws Exception {
         SQLiteDatabase db = getWritableDatabase();
         try {
             ContentValues values = new ContentValues();
@@ -212,32 +216,34 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
             values.put(LESSON_SCHEDULE_LESSON, schedule.getLesson());
             db.update(LESSON_SCHEDULE_TABLE_NAME, values, LESSON_SCHEDULE_ID + " = ?", new String[]{String.valueOf(schedule.getId())});
         } catch (Exception e) {
-            e.printStackTrace();
+            db.close();
+            throw new Exception(e.getMessage());
         } finally {
             db.close();
         }
     }
 
-    public void deleteSchedule(LessonSchedule schedule) {
+    public void deleteSchedule(LessonSchedule schedule) throws Exception {
         SQLiteDatabase db = getWritableDatabase();
         try {
             db.delete(LESSON_SCHEDULE_TABLE_NAME, LESSON_SCHEDULE_ID + "=?", new String[]{String.valueOf(schedule.getId())});
         } catch (Exception e) {
-            e.printStackTrace();
+            db.close();
+            throw new Exception(e.getMessage());
         } finally {
             db.close();
         }
     }
 
-    public boolean checkIsDataAlready(String TableName, String dbfield, String fieldValue) {
+    private boolean checkIsDataAlready(String tableName, String dbField, String fieldValue) {
         SQLiteDatabase db = getReadableDatabase();
-        String Query = "Select * from " + TableName + " where " + dbfield + " = " + fieldValue;
+        String Query = "Select * from " + tableName + " where " + dbField + " = " + fieldValue;
         Cursor cursor = db.rawQuery(Query, null);
         if (cursor.getCount() <= 0) {
             cursor.close();
-            return false;
+            return true;
         }
         cursor.close();
-        return true;
+        return false;
     }
 }

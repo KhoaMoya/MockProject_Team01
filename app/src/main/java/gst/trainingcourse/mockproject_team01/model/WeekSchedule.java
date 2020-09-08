@@ -58,4 +58,8 @@ public class WeekSchedule implements Serializable {
         this.name = name;
     }
 
+    public Date[] getDates() {
+        return new Date[]{startDate, endDate};
+    }
+
 }

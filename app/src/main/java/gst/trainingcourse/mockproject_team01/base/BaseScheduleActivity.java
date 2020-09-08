@@ -26,7 +26,7 @@ public abstract class BaseScheduleActivity extends AppCompatActivity {
     public WeekSchedule currentWeekSchedule;
     protected AppDatabaseHelper appDatabase;
     public ScheduleTableAdapter scheduleTableAdapter;
-    protected RecyclerView scheduleTable;
+    public RecyclerView scheduleTable;
     public TextView txtWeekName;
     protected Disposable disposable;
     protected ProgressBar progressBarLoading;
@@ -40,7 +40,7 @@ public abstract class BaseScheduleActivity extends AppCompatActivity {
     }
 
 
-    protected Single<WeekSchedule> getWeekSchedule(Date[] dates) {
+    public Single<WeekSchedule> getWeekSchedule(Date[] dates) {
         final Date[] periodWeek;
         if (dates.length == 1) {
             periodWeek = TimeUtils.getPeriodWeek(dates[0]);
@@ -59,7 +59,7 @@ public abstract class BaseScheduleActivity extends AppCompatActivity {
                 .subscribeOn(Schedulers.io());
     }
 
-    public void showWeekSchedule(WeekSchedule weekSchedule) {
+    public void updateWeekSchedule(WeekSchedule weekSchedule) {
         currentWeekSchedule = weekSchedule;
         scheduleTableAdapter.setWeekSchedule(weekSchedule);
         txtWeekName.setText(weekSchedule.getName());
@@ -73,7 +73,7 @@ public abstract class BaseScheduleActivity extends AppCompatActivity {
         if (progressBarLoading != null) progressBarLoading.setVisibility(View.GONE);
     }
 
-    protected SingleObserver<WeekSchedule> weekScheduleObserver = new SingleObserver<WeekSchedule>() {
+    public SingleObserver<WeekSchedule> weekScheduleObserver = new SingleObserver<WeekSchedule>() {
 
         @Override
         public void onSubscribe(Disposable d) {
@@ -82,7 +82,7 @@ public abstract class BaseScheduleActivity extends AppCompatActivity {
 
         @Override
         public void onSuccess(WeekSchedule weekSchedule) {
-            showWeekSchedule(weekSchedule);
+            updateWeekSchedule(weekSchedule);
         }
 
         @Override

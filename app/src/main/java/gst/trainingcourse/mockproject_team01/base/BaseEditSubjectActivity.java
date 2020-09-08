@@ -7,12 +7,17 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
+
 import gst.trainingcourse.mockproject_team01.R;
+import gst.trainingcourse.mockproject_team01.model.tracker.EditAction;
+import gst.trainingcourse.mockproject_team01.model.tracker.SubjectTracker;
 
 public abstract class BaseEditSubjectActivity extends AppCompatActivity implements View.OnClickListener {
 
     protected Button btnOk, btnCancel;
     protected EditText edtSubjectName;
+    protected ArrayList<SubjectTracker> subjectList;
 
     protected abstract void initViews();
 
@@ -22,8 +27,10 @@ public abstract class BaseEditSubjectActivity extends AppCompatActivity implemen
     }
 
     private void onClickOk() {
-        validate(edtSubjectName.getText().toString());
+        validateSubjectName(edtSubjectName.getText().toString());
     }
+
+    protected abstract void getData();
 
     protected abstract void actionOk(String newName);
 
@@ -40,11 +47,22 @@ public abstract class BaseEditSubjectActivity extends AppCompatActivity implemen
         }
     }
 
-    private void validate(String name) {
+    private void validateSubjectName(String name) {
         String newName = name.trim();
-        if (newName.isEmpty()) Toast.makeText(this, "New name is empty", Toast.LENGTH_SHORT).show();
-        else {
+        if (newName.isEmpty()) {
+            Toast.makeText(this, "New name is empty", Toast.LENGTH_SHORT).show();
+        } else if (isExistSubjectName(name)) {
+            Toast.makeText(this, "This name already exists", Toast.LENGTH_SHORT).show();
+        } else {
             actionOk(newName);
         }
+    }
+
+    private boolean isExistSubjectName(String newName) {
+        for (SubjectTracker subjectTracker : subjectList) {
+            if (subjectTracker.action != EditAction.DELETE && subjectTracker.subject.getName().equals(newName))
+                return true;
+        }
+        return false;
     }
 }

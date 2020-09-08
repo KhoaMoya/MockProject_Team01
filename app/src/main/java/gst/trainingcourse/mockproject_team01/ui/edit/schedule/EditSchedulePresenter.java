@@ -9,6 +9,7 @@ import gst.trainingcourse.mockproject_team01.MyApplication;
 import gst.trainingcourse.mockproject_team01.adapter.SubjectTableAdapter;
 import gst.trainingcourse.mockproject_team01.base.BaseScheduleActivity;
 import gst.trainingcourse.mockproject_team01.model.LessonSchedule;
+import gst.trainingcourse.mockproject_team01.model.PassObject;
 import gst.trainingcourse.mockproject_team01.model.Subject;
 import gst.trainingcourse.mockproject_team01.model.WeekSchedule;
 import gst.trainingcourse.mockproject_team01.model.tracker.EditAction;
@@ -33,7 +34,6 @@ public class EditSchedulePresenter implements EditScheduleContract.presenter {
 
     public ArrayList<ScheduleTracker> scheduleTrackerList;
     public ArrayList<SubjectTracker> subjectTrackerList;
-    public WeekSchedule currentWeekSchedule;
     public boolean isEditingSubjectName = false;
     private CompositeDisposable mDisposable;
     private BaseScheduleActivity mActivity;
@@ -48,22 +48,38 @@ public class EditSchedulePresenter implements EditScheduleContract.presenter {
 
     @Override
     public void initWeekSchedule(WeekSchedule weekSchedule) {
-        currentWeekSchedule = weekSchedule;
+        mActivity.currentWeekSchedule = weekSchedule;
         for (LessonSchedule sch : weekSchedule.getLessonSchedules()) {
             scheduleTrackerList.add(new ScheduleTracker(EditAction.NONE, sch));
         }
     }
 
     @Override
-    public Single<ArrayList<Subject>> getAllSubjectFromDb() {
-        return Single.create(new SingleOnSubscribe<ArrayList<Subject>>() {
+    public void loadAllSubjectFromDb() {
+        Single.create(new SingleOnSubscribe<ArrayList<Subject>>() {
             @Override
             public void subscribe(SingleEmitter<ArrayList<Subject>> emitter) throws Exception {
                 if (!emitter.isDisposed())
                     emitter.onSuccess(AppDatabaseHelper.getInstance(MyApplication.getContext()).getAllSubjects());
             }
         }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread());
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SingleObserver<ArrayList<Subject>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        addDisposable(d);
+                    }
+
+                    @Override
+                    public void onSuccess(ArrayList<Subject> subjects) {
+                        updateSubjectTable(subjects);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
     @Override
@@ -80,27 +96,38 @@ public class EditSchedulePresenter implements EditScheduleContract.presenter {
         if (tracker.action == EditAction.ADD) {
             scheduleTrackerList.add(tracker);
         } else if (tracker.action == EditAction.EDIT || tracker.action == EditAction.DELETE) {
-            for (int i = 0; i < scheduleTrackerList.size(); i++) {
-                if (scheduleTrackerList.get(i).schedule.getId() == tracker.schedule.getId()) {
-                    if (tracker.action == EditAction.EDIT && scheduleTrackerList.get(i).action == EditAction.ADD) {
-                        scheduleTrackerList.get(i).schedule = tracker.schedule;
-                    } else if (tracker.action == EditAction.DELETE && scheduleTrackerList.get(i).action == EditAction.ADD) {
-                        scheduleTrackerList.remove(i);
+            int index = scheduleTrackerList.size() - 1;
+            while (index >= 0) {
+                ScheduleTracker scheduleTracker = scheduleTrackerList.get(index);
+                if (scheduleTracker.schedule.getId() == tracker.schedule.getId() && scheduleTracker.action != EditAction.DELETE) {
+                    EditAction action = scheduleTracker.action;
+                    if (tracker.action == EditAction.EDIT) {
+                        if (action == EditAction.NONE) {
+                            scheduleTracker.action = EditAction.EDIT;
+                        }
+                        scheduleTracker.schedule = tracker.schedule;
+                    } else if (tracker.action == EditAction.DELETE) {
+                        if (action == EditAction.ADD) {
+                            scheduleTrackerList.remove(index);
+                        } else {
+                            scheduleTrackerList.get(index).action = EditAction.DELETE;
+                        }
                     }
                     break;
                 }
+                index -= 1;
             }
         }
-        mActivity.showWeekSchedule(reloadSchedulesInWeekFromTrackers());
+        mActivity.updateWeekSchedule(reloadSchedulesInWeekFromTrackers(mActivity.currentWeekSchedule.getDates()));
     }
 
     @Override
-    public WeekSchedule reloadSchedulesInWeekFromTrackers() {
+    public WeekSchedule reloadSchedulesInWeekFromTrackers(Date[] dates) {
         long startTime, endTime;
-        WeekSchedule weekSchedule = new WeekSchedule(currentWeekSchedule.getStartDate(), currentWeekSchedule.getEndDate());
+        WeekSchedule weekSchedule = new WeekSchedule(dates[0], dates[1]);
 
-        long startWeek = currentWeekSchedule.getStartDate().getTime();
-        long endWeek = currentWeekSchedule.getEndDate().getTime();
+        long startWeek = dates[0].getTime();
+        long endWeek = dates[1].getTime();
 
         for (int i = 0; i < scheduleTrackerList.size(); i++) {
             if (scheduleTrackerList.get(i).action == EditAction.DELETE) continue;
@@ -108,8 +135,12 @@ public class EditSchedulePresenter implements EditScheduleContract.presenter {
             LessonSchedule schedule = scheduleTrackerList.get(i).schedule;
             startTime = schedule.getStartDate().getTime();
             endTime = schedule.getEndDate().getTime();
+            int day = schedule.getDay();
 
-            if (startTime < endWeek && endTime >= startWeek) {
+            if (startTime < endWeek
+                    && TimeUtils.dayOf(startTime) <= day
+                    && endTime >= startWeek
+                    && TimeUtils.dayOf(endTime) >= day) {
                 weekSchedule.getLessonSchedules().add(schedule);
             }
         }
@@ -119,6 +150,21 @@ public class EditSchedulePresenter implements EditScheduleContract.presenter {
     @Override
     public void setClickableSubjectTable(boolean isClickable) {
         subjectTableAdapter.isCanClickItem = isClickable;
+        subjectTableAdapter.isCanDragItem = !isClickable;
+    }
+
+    @Override
+    public void setDraggableScheduleTable(boolean isDragable) {
+        if (isDragable) {
+            mActivity.scheduleTable.setAlpha(1f);
+            mActivity.txtWeekName.setAlpha(1f);
+            mActivity.txtWeekName.setClickable(true);
+        } else {
+            mActivity.scheduleTable.setAlpha(0.5f);
+            mActivity.txtWeekName.setAlpha(0.5f);
+            mActivity.txtWeekName.setClickable(false);
+        }
+        mActivity.scheduleTableAdapter.isCanDragItem = isDragable;
     }
 
     @Override
@@ -127,7 +173,7 @@ public class EditSchedulePresenter implements EditScheduleContract.presenter {
         if (editedSubject != null) {
             for (int i = 0; i < subjectTrackerList.size(); i++) {
                 if (subjectTrackerList.get(i).subject.getId() == editedSubject.getId()
-                        && subjectTrackerList.get(i).action != null) {
+                        && subjectTrackerList.get(i).action != EditAction.DELETE) {
                     index = i;
                     break;
                 }
@@ -139,12 +185,15 @@ public class EditSchedulePresenter implements EditScheduleContract.presenter {
                 subjectTrackerList.get(index).subject = editedSubject;
 
                 showSubjectTable();
-                updateSchedulesBySubjects();
+                updateScheduleTrackersBySubjectTrackers();
+                WeekSchedule newWeekSchedule = reloadSchedulesInWeekFromTrackers(mActivity.currentWeekSchedule.getDates());
+                mActivity.updateWeekSchedule(newWeekSchedule);
             }
         }
     }
 
-    private ArrayList<Subject> getSubjectListToDisplay() {
+    @Override
+    public ArrayList<Subject> getSubjectListToDisplay() {
         ArrayList<Subject> list = new ArrayList<>();
         for (SubjectTracker tracker : subjectTrackerList) {
             if (tracker.action != EditAction.DELETE) list.add(tracker.subject);
@@ -164,38 +213,37 @@ public class EditSchedulePresenter implements EditScheduleContract.presenter {
     }
 
     @Override
-    public void updateSchedulesBySubjects() {
+    public void updateScheduleTrackersBySubjectTrackers() {
         for (int i = 0; i < subjectTrackerList.size(); i++) {
-            long idEditedSubject = subjectTrackerList.get(i).subject.getId();
+            if (subjectTrackerList.get(i).action == EditAction.DELETE) continue;
+            long idSubject = subjectTrackerList.get(i).subject.getId();
             for (int j = 0; j < scheduleTrackerList.size(); j++) {
-                if (scheduleTrackerList.get(j).schedule.getSubject().getId() == idEditedSubject) {
-                    scheduleTrackerList.get(j).schedule.setSubject(subjectTrackerList.get(i).subject);
-                    currentWeekSchedule = reloadSchedulesInWeekFromTrackers();
-                    mActivity.showWeekSchedule(currentWeekSchedule);
+                ScheduleTracker scheduleTracker = scheduleTrackerList.get(j);
+                LessonSchedule schedule = scheduleTracker.schedule;
+                if (schedule.getSubject().getId() == idSubject && scheduleTracker.action != EditAction.DELETE) {
+                    schedule.setSubject(subjectTrackerList.get(i).subject);
                 }
             }
         }
     }
 
     @Override
-    public WeekSchedule mapWeekSchedule(WeekSchedule fromDb, ArrayList<ScheduleTracker> scheduleTrackers) {
+    public WeekSchedule mapWeekSchedule(WeekSchedule fromDb) {
         ArrayList<LessonSchedule> scheduleList = new ArrayList<>(fromDb.getLessonSchedules());
         for (int i = 0; i < scheduleList.size(); i++) {
             boolean isExist = false;
             long id = scheduleList.get(i).getId();
-            for (int j = 0; j < scheduleTrackers.size(); i++) {
-                if (scheduleTrackers.get(j).schedule.getId() == id) {
+            for (int j = 0; j < scheduleTrackerList.size(); j++) {
+                if (scheduleTrackerList.get(j).schedule.getId() == id) {
                     isExist = true;
                     break;
                 }
             }
             if (!isExist) {
-                scheduleTrackers.add(new ScheduleTracker(EditAction.NONE, scheduleList.get(i)));
+                scheduleTrackerList.add(new ScheduleTracker(EditAction.NONE, scheduleList.get(i)));
             }
         }
-        currentWeekSchedule = fromDb;
-        WeekSchedule mapWeekSchedule = reloadSchedulesInWeekFromTrackers();
-        return mapWeekSchedule;
+        return reloadSchedulesInWeekFromTrackers(fromDb.getDates());
     }
 
     @Override
@@ -272,13 +320,13 @@ public class EditSchedulePresenter implements EditScheduleContract.presenter {
 
     @Override
     public void onNextWeek() {
-        Date[] dates = TimeUtils.getPeriodNextWeek(currentWeekSchedule.getStartDate());
+        Date[] dates = TimeUtils.getPeriodNextWeek(mActivity.currentWeekSchedule.getStartDate());
         updateWeekSchedule(dates);
     }
 
     @Override
     public void onPrevWeek() {
-        Date[] dates = TimeUtils.getPeriodPrevWeek(currentWeekSchedule.getStartDate());
+        Date[] dates = TimeUtils.getPeriodPrevWeek(mActivity.currentWeekSchedule.getStartDate());
         updateWeekSchedule(dates);
     }
 
@@ -301,8 +349,8 @@ public class EditSchedulePresenter implements EditScheduleContract.presenter {
 
                     @Override
                     public void onSuccess(WeekSchedule newWeekSchedule) {
-                        WeekSchedule mapWeekSchedule = mapWeekSchedule(newWeekSchedule, scheduleTrackerList);
-                        mActivity.showWeekSchedule(mapWeekSchedule);
+                        WeekSchedule mapWeekSchedule = mapWeekSchedule(newWeekSchedule);
+                        mActivity.updateWeekSchedule(mapWeekSchedule);
                     }
 
                     @Override
@@ -310,12 +358,56 @@ public class EditSchedulePresenter implements EditScheduleContract.presenter {
                         e.printStackTrace();
                     }
                 });
-
     }
 
     @Override
     public void updateWeekSchedule(final int year, final int month, final int day) {
         updateWeekSchedule(TimeUtils.getPeriodWeek(year, month, day));
+    }
+
+    @Override
+    public void deleteItem(final PassObject<?> passObject) {
+        if (passObject.type == PassObject.Type.SUBJECT) {
+            Subject subject = (Subject) passObject.data;
+            for (int i = 0; i < subjectTrackerList.size(); i++) {
+                if (subjectTrackerList.get(i).subject.getId() == subject.getId()) {
+                    int index = scheduleTrackerList.size() - 1;
+                    while (index >= 0) {
+                        ScheduleTracker scheduleTracker = scheduleTrackerList.get(index);
+                        if (scheduleTracker.schedule.getSubject().getId() == subject.getId()) {
+                            if (scheduleTracker.action == EditAction.ADD) {
+                                scheduleTrackerList.remove(index);
+                            } else {
+                                scheduleTracker.action = EditAction.DELETE;
+                            }
+                        }
+                        index -= 1;
+                    }
+                    if (subjectTrackerList.get(i).action == EditAction.ADD) {
+                        subjectTrackerList.remove(i);
+                    } else {
+                        subjectTrackerList.get(i).action = EditAction.DELETE;
+                    }
+                    break;
+                }
+            }
+            showSubjectTable();
+        } else if (passObject.type == PassObject.Type.LESSON) {
+            LessonSchedule lessonSchedule = (LessonSchedule) passObject.data;
+            int index = scheduleTrackerList.size() - 1;
+            while (index >= 0) {
+                if (scheduleTrackerList.get(index).schedule.getId() == lessonSchedule.getId()) {
+                    if (scheduleTrackerList.get(index).action == EditAction.ADD) {
+                        scheduleTrackerList.remove(index);
+                    } else {
+                        scheduleTrackerList.get(index).action = EditAction.DELETE;
+                    }
+                }
+                index -= 1;
+            }
+        }
+        WeekSchedule weekSchedule = reloadSchedulesInWeekFromTrackers(mActivity.currentWeekSchedule.getDates());
+        mActivity.updateWeekSchedule(weekSchedule);
     }
 
     @Override

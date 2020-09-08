@@ -138,4 +138,10 @@ public class TimeUtils {
         return getPeriodWeek(calendar.getTime());
     }
 
+    public static int dayOf(long time) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(time);
+        return calendar.get(Calendar.DAY_OF_WEEK);
+    }
+
 }

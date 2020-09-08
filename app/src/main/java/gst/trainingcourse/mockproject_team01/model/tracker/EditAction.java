@@ -1,6 +1,8 @@
 package gst.trainingcourse.mockproject_team01.model.tracker;
 
-public enum EditAction {
+import java.io.Serializable;
+
+public enum EditAction implements Serializable {
     NONE,
     EDIT,
     DELETE,

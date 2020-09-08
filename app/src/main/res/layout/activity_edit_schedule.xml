@@ -7,59 +7,42 @@
     android:background="@color/colorWhite"
     tools:context=".ui.edit.schedule.EditScheduleActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/action_bar"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="56dp"
+        android:layout_marginStart="16dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="16dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            app:layout_constraintStart_toStartOf="parent">
-
-            <ImageButton
-                android:id="@+id/img_prev_week"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:background="?actionBarItemBackground"
-                android:padding="14dp"
-                android:src="@drawable/ic_back" />
-
-            <TextView
-                android:id="@+id/txt_week_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/colorBlack"
-                android:textSize="17sp"
-                android:textStyle="bold"
-                tools:text="Day 05-11/09/2020" />
-
-            <ImageButton
-                android:id="@+id/img_next_week"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:background="?actionBarItemBackground"
-                android:padding="14dp"
-                android:src="@drawable/ic_next" />
-
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/img_trash"
+        <ImageButton
+            android:id="@+id/img_prev_week"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:padding="16dp"
-            android:src="@drawable/ic_trash"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:background="?actionBarItemBackground"
+            android:padding="14dp"
+            android:src="@drawable/ic_back" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/txt_week_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/colorBlack"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            tools:text="Day 05-11/09/2020" />
+
+        <ImageButton
+            android:id="@+id/img_next_week"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="?actionBarItemBackground"
+            android:padding="14dp"
+            android:src="@drawable/ic_next" />
+
+    </LinearLayout>
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
@@ -113,27 +96,27 @@
             android:id="@+id/btn_edit_subject"
             android:layout_width="0dp"
             android:layout_height="40dp"
+            android:layout_marginEnd="5dp"
             android:layout_marginBottom="10dp"
             android:background="@drawable/bg_pressable_gray_corner8"
             android:text="Edit lesson"
             android:textAllCaps="false"
-            android:layout_marginEnd="5dp"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/btn_ok"
             app:layout_constraintEnd_toStartOf="@id/btn_add_subject"
-            app:layout_constraintBottom_toTopOf="@id/btn_ok" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <Button
             android:id="@+id/btn_add_subject"
             android:layout_width="0dp"
             android:layout_height="40dp"
+            android:layout_marginStart="5dp"
             android:layout_marginBottom="10dp"
             android:background="@drawable/bg_pressable_gray_corner8"
             android:text="Add lesson"
-            android:layout_marginStart="5dp"
             android:textAllCaps="false"
-            app:layout_constraintStart_toEndOf="@id/btn_edit_subject"
+            app:layout_constraintBottom_toTopOf="@id/btn_ok"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/btn_ok" />
+            app:layout_constraintStart_toEndOf="@id/btn_edit_subject" />
 
         <Button
             android:id="@+id/btn_ok"
@@ -161,14 +144,25 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <ImageView
+        android:id="@+id/img_trash"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="10dp"
+        android:padding="10dp"
+        android:src="@drawable/ic_trash_close"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <ProgressBar
         android:id="@+id/pb_loading"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

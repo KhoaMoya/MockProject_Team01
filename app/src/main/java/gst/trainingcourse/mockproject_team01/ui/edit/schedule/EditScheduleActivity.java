@@ -12,13 +12,14 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
-
 import gst.trainingcourse.mockproject_team01.R;
-import gst.trainingcourse.mockproject_team01.adapter.LessonScheduleListener;
-import gst.trainingcourse.mockproject_team01.adapter.OnClickItemListener;
 import gst.trainingcourse.mockproject_team01.adapter.SubjectTableAdapter;
+import gst.trainingcourse.mockproject_team01.adapter.listener.LessonScheduleListener;
+import gst.trainingcourse.mockproject_team01.adapter.listener.OnClickItemListener;
+import gst.trainingcourse.mockproject_team01.adapter.listener.OnDeleteItemListener;
+import gst.trainingcourse.mockproject_team01.adapter.listener.RecycleBinDropListener;
 import gst.trainingcourse.mockproject_team01.base.BaseScheduleActivity;
+import gst.trainingcourse.mockproject_team01.model.PassObject;
 import gst.trainingcourse.mockproject_team01.model.Subject;
 import gst.trainingcourse.mockproject_team01.model.WeekSchedule;
 import gst.trainingcourse.mockproject_team01.model.tracker.ScheduleTracker;
@@ -26,17 +27,17 @@ import gst.trainingcourse.mockproject_team01.ui.edit.subject.AddSubjectActivity;
 import gst.trainingcourse.mockproject_team01.ui.edit.subject.RenameSubjectActivity;
 import gst.trainingcourse.mockproject_team01.ui.main.MainActivity;
 import gst.trainingcourse.mockproject_team01.utils.TimeUtils;
-import io.reactivex.SingleObserver;
-import io.reactivex.disposables.Disposable;
 
 public class EditScheduleActivity extends BaseScheduleActivity implements View.OnClickListener
         , OnClickItemListener<Subject>
-        , LessonScheduleListener {
+        , LessonScheduleListener
+        , OnDeleteItemListener {
 
     public final static String RENAME_SUBJECT_KEY = "edit subject key";
     public final static int EDIT_SUBJECT_REQUEST_CODE = 10;
     public final static String ADD_SUBJECT_KEY = "add subject key";
     public final static int ADD_SUBJECT_REQUEST_CODE = 12;
+    public final static String SUBJECT_LIST_KEY = "subject list";
 
     private ImageView imgTrash, btnPrevWeek, btnNextWeek;
     private RecyclerView subjectTable;
@@ -73,7 +74,7 @@ public class EditScheduleActivity extends BaseScheduleActivity implements View.O
             @Override
             public void run() {
                 initSubjectTable();
-                loadAllSubjectsFromDb();
+                mEditSchedulePresenter.loadAllSubjectFromDb();
             }
         });
     }
@@ -89,31 +90,11 @@ public class EditScheduleActivity extends BaseScheduleActivity implements View.O
     private void getScheduleFromIntent() {
         WeekSchedule weekSchedule = (WeekSchedule) getIntent().getSerializableExtra(MainActivity.EDIT_SCHECULE_KEY);
         if (weekSchedule != null) {
-            showWeekSchedule(weekSchedule);
+            updateWeekSchedule(weekSchedule);
             mEditSchedulePresenter.initWeekSchedule(weekSchedule);
         } else {
             finish();
         }
-    }
-
-    private void loadAllSubjectsFromDb() {
-        mEditSchedulePresenter.getAllSubjectFromDb()
-                .subscribe(new SingleObserver<ArrayList<Subject>>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        mEditSchedulePresenter.addDisposable(d);
-                    }
-
-                    @Override
-                    public void onSuccess(ArrayList<Subject> subjects) {
-                        mEditSchedulePresenter.updateSubjectTable(subjects);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        e.printStackTrace();
-                    }
-                });
     }
 
     @Override
@@ -124,6 +105,7 @@ public class EditScheduleActivity extends BaseScheduleActivity implements View.O
                 break;
             case R.id.btn_add_subject:
                 Intent addSubjectIntent = new Intent(EditScheduleActivity.this, AddSubjectActivity.class);
+                addSubjectIntent.putExtra(SUBJECT_LIST_KEY, mEditSchedulePresenter.subjectTrackerList);
                 startActivityForResult(addSubjectIntent, ADD_SUBJECT_REQUEST_CODE);
                 break;
             case R.id.txt_week_name:
@@ -145,7 +127,7 @@ public class EditScheduleActivity extends BaseScheduleActivity implements View.O
     }
 
     private void showChangeWeekDialog() {
-        int[] times = TimeUtils.getYearMonthDay(mEditSchedulePresenter.currentWeekSchedule.getStartDate());
+        int[] times = TimeUtils.getYearMonthDay(currentWeekSchedule.getStartDate());
         new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker datePicker, int year, int month, int day) {
@@ -163,6 +145,11 @@ public class EditScheduleActivity extends BaseScheduleActivity implements View.O
         mEditSchedulePresenter.isEditingSubjectName = !mEditSchedulePresenter.isEditingSubjectName;
     }
 
+    @Override
+    public void onDeleteItem(PassObject<?> passObject) {
+        mEditSchedulePresenter.deleteItem(passObject);
+    }
+
     private void initActions() {
         btnEditSubjectName.setOnClickListener(this);
         btnOk.setOnClickListener(this);
@@ -172,7 +159,7 @@ public class EditScheduleActivity extends BaseScheduleActivity implements View.O
         btnNextWeek.setOnClickListener(this);
         btnPrevWeek.setOnClickListener(this);
 
-        imgTrash.setOnDragListener(new RecycleBinDropListener());
+        imgTrash.setOnDragListener(new RecycleBinDropListener(this));
     }
 
     @Override
@@ -185,6 +172,7 @@ public class EditScheduleActivity extends BaseScheduleActivity implements View.O
         btnEditSubjectName.setText("Cancel editing");
         btnEditSubjectName.setTextColor(ContextCompat.getColor(this, R.color.colorRed));
         mEditSchedulePresenter.setClickableSubjectTable(true);
+        mEditSchedulePresenter.setDraggableScheduleTable(false);
     }
 
     private void disableEditingState() {
@@ -192,12 +180,14 @@ public class EditScheduleActivity extends BaseScheduleActivity implements View.O
         btnEditSubjectName.setText("Edit lesson");
         btnEditSubjectName.setTextColor(ContextCompat.getColor(this, R.color.colorBlack));
         mEditSchedulePresenter.setClickableSubjectTable(false);
+        mEditSchedulePresenter.setDraggableScheduleTable(true);
     }
 
     @Override
     public void onClickItem(Subject subject) {
         Intent intent = new Intent(this, RenameSubjectActivity.class);
         intent.putExtra(RENAME_SUBJECT_KEY, subject);
+        intent.putExtra(SUBJECT_LIST_KEY, mEditSchedulePresenter.subjectTrackerList);
         startActivityForResult(intent, EDIT_SUBJECT_REQUEST_CODE);
     }
 
@@ -245,8 +235,5 @@ public class EditScheduleActivity extends BaseScheduleActivity implements View.O
         super.onDestroy();
     }
 
-//     TODO drag để xóa
-//     TODO Thêm vào lớp BaseScheduleActivity hàm setResult()
 //     TODO ẩn itemview khi drag
-//     TODO disable click khi ở chế độ edit lesson name
 }

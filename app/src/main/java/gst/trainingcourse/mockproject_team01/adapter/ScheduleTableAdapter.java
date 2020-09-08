@@ -88,9 +88,11 @@ public class ScheduleTableAdapter extends BaseTableAdapter<LessonSchedule, Sched
             String name = "";
             if (mHeaderPositions.contains(position)) {
                 name = mHeaderLabels.get(mHeaderPositions.indexOf(position));
+                txtSubjectName.setTextSize(12);
                 if (position != 0) txtSubjectName.setBackgroundResource(R.drawable.bg_header_label);
             } else {
                 if (!mDataList.isEmpty()) {
+                    txtSubjectName.setTextSize(13);
                     LessonSchedule schedule = mDataList.get(position);
                     data = schedule;
                     if (schedule != null) {
@@ -102,7 +104,7 @@ public class ScheduleTableAdapter extends BaseTableAdapter<LessonSchedule, Sched
         }
 
         @Override
-        public boolean isDragable() {
+        public boolean isDraggable() {
             return data != null && isCanDragItem;
         }
 

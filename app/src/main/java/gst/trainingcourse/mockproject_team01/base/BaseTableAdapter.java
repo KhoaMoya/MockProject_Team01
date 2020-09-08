@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-import gst.trainingcourse.mockproject_team01.adapter.LessonScheduleListener;
-import gst.trainingcourse.mockproject_team01.adapter.OnClickItemListener;
+import gst.trainingcourse.mockproject_team01.adapter.listener.LessonScheduleListener;
+import gst.trainingcourse.mockproject_team01.adapter.listener.OnClickItemListener;
 import gst.trainingcourse.mockproject_team01.model.PassObject;
 
 public abstract class BaseTableAdapter<O, T extends BaseTableAdapter.BaseItemViewHolder> extends RecyclerView.Adapter<T> {
@@ -50,12 +50,6 @@ public abstract class BaseTableAdapter<O, T extends BaseTableAdapter.BaseItemVie
         return 0;
     }
 
-    public ArrayList<O> getDataList() {
-        ArrayList<O> list = new ArrayList<>();
-        for (O o : mDataList) if (o != null) list.add(o);
-        return list;
-    }
-
     public void setLessonScheduleListener(LessonScheduleListener listener) {
         this.lessonScheduleListener = listener;
     }
@@ -77,7 +71,7 @@ public abstract class BaseTableAdapter<O, T extends BaseTableAdapter.BaseItemVie
 
         @Override
         public boolean onLongClick(View view) {
-            if (isDragable()) {
+            if (isDraggable()) {
                 PassObject<O> passObject = getPassObject();
                 ClipData clipData = ClipData.newPlainText("", "");
                 View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
@@ -98,7 +92,7 @@ public abstract class BaseTableAdapter<O, T extends BaseTableAdapter.BaseItemVie
             return false;
         }
 
-        public boolean isDragable() {
+        public boolean isDraggable() {
             return false;
         }
     }

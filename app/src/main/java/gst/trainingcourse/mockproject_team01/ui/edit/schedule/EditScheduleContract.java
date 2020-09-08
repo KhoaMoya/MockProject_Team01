@@ -3,22 +3,22 @@ package gst.trainingcourse.mockproject_team01.ui.edit.schedule;
 import java.util.ArrayList;
 import java.util.Date;
 
+import gst.trainingcourse.mockproject_team01.model.PassObject;
 import gst.trainingcourse.mockproject_team01.model.Subject;
 import gst.trainingcourse.mockproject_team01.model.WeekSchedule;
 import gst.trainingcourse.mockproject_team01.model.tracker.ScheduleTracker;
-import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
 
 interface EditScheduleContract {
 
     interface presenter {
-        Single<ArrayList<Subject>> getAllSubjectFromDb();
+        void loadAllSubjectFromDb();
 
         void updateScheduleTracker(ScheduleTracker tracker);
 
-        WeekSchedule reloadSchedulesInWeekFromTrackers();
+        WeekSchedule reloadSchedulesInWeekFromTrackers(Date[] dates);
 
-        void updateSchedulesBySubjects();
+        void updateScheduleTrackersBySubjectTrackers();
 
         void initWeekSchedule(WeekSchedule weekSchedule);
 
@@ -26,7 +26,7 @@ interface EditScheduleContract {
 
         void updateWeekSchedule(Date[] dates);
 
-        WeekSchedule mapWeekSchedule(WeekSchedule fromDb, ArrayList<ScheduleTracker> scheduleTrackers);
+        WeekSchedule mapWeekSchedule(WeekSchedule fromDb);
 
         void updateSubjectTable(ArrayList<Subject> subjects);
 
@@ -49,6 +49,12 @@ interface EditScheduleContract {
         void onPrevWeek();
 
         boolean isEdited();
+
+        ArrayList<Subject> getSubjectListToDisplay();
+
+        void deleteItem(PassObject<?> passObject);
+
+        void setDraggableScheduleTable(boolean isDragable);
 
     }
 }

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import java.util.ArrayList;
 
 import gst.trainingcourse.mockproject_team01.R;
+import gst.trainingcourse.mockproject_team01.adapter.listener.OnClickItemListener;
 import gst.trainingcourse.mockproject_team01.base.BaseTableAdapter;
 import gst.trainingcourse.mockproject_team01.model.PassObject;
 import gst.trainingcourse.mockproject_team01.model.Subject;
@@ -81,13 +82,12 @@ public class SubjectTableAdapter extends BaseTableAdapter<Subject, SubjectTableA
         }
 
         @Override
-        public boolean isDragable() {
+        public boolean isDraggable() {
             return data != null && isCanDragItem;
         }
 
         @Override
         public PassObject<Subject> getPassObject() {
-            Subject subject = (Subject) data;
             return new PassObject<>((Subject) data, PassObject.Type.SUBJECT, getAdapterPosition());
         }
     }
