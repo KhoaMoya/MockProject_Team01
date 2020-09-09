@@ -73,16 +73,15 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     }
 
     public ArrayList<LessonSchedule> getSchedules(Date[] dates) {
-        long startTime = dates[0].getTime();
-        long endTime = dates[1].getTime();
+        long startWeek = dates[0].getTime();
+        long endWeek = dates[1].getTime();
 
-        String sql = "SELECT * FROM " + LESSON_SCHEDULE_TABLE_NAME + " where " + LESSON_SCHEDULE_START_TIME + " < " + endTime
-                + " AND " + LESSON_SCHEDULE_END_TIME + " >= " + startTime;
+        String sql = "SELECT * FROM " + LESSON_SCHEDULE_TABLE_NAME;
         SQLiteDatabase db = getReadableDatabase();
         ArrayList<LessonSchedule> listSchedule = new ArrayList<>();
 
         int day, lesson;
-        long sTime, eTime, id, subId;
+        long startTime, endTime, id, subId;
         Subject subject;
 
         Cursor cursor = db.rawQuery(sql, null);
@@ -91,14 +90,14 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
                 try {
                     id = cursor.getLong(cursor.getColumnIndex(LESSON_SCHEDULE_ID));
                     subId = cursor.getLong(cursor.getColumnIndex(LESSON_SCHEDULE_SUBJECT_ID));
-                    sTime = cursor.getLong(cursor.getColumnIndex(LESSON_SCHEDULE_START_TIME));
-                    eTime = cursor.getLong(cursor.getColumnIndex(LESSON_SCHEDULE_END_TIME));
+                    startTime = cursor.getLong(cursor.getColumnIndex(LESSON_SCHEDULE_START_TIME));
+                    endTime = cursor.getLong(cursor.getColumnIndex(LESSON_SCHEDULE_END_TIME));
                     day = cursor.getInt(cursor.getColumnIndex(LESSON_SCHEDULE_DAY));
                     lesson = cursor.getInt(cursor.getColumnIndex(LESSON_SCHEDULE_LESSON));
 
-                    if (TimeUtils.dayOf(sTime) <= day && TimeUtils.dayOf(eTime) >= day) {
+                    if (TimeUtils.isInWeek(dates, new long[]{startTime, endTime}, day)) {
                         subject = getSubject(subId);
-                        listSchedule.add(new LessonSchedule(id, new Date(sTime), new Date(eTime), subject, day, lesson));
+                        listSchedule.add(new LessonSchedule(id, new Date(startTime), new Date(endTime), subject, day, lesson));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

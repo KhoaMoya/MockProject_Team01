@@ -126,9 +126,6 @@ public class EditSchedulePresenter implements EditScheduleContract.presenter {
         long startTime, endTime;
         WeekSchedule weekSchedule = new WeekSchedule(dates[0], dates[1]);
 
-        long startWeek = dates[0].getTime();
-        long endWeek = dates[1].getTime();
-
         for (int i = 0; i < scheduleTrackerList.size(); i++) {
             if (scheduleTrackerList.get(i).action == EditAction.DELETE) continue;
 
@@ -137,10 +134,7 @@ public class EditSchedulePresenter implements EditScheduleContract.presenter {
             endTime = schedule.getEndDate().getTime();
             int day = schedule.getDay();
 
-            if (startTime < endWeek
-                    && TimeUtils.dayOf(startTime) <= day
-                    && endTime >= startWeek
-                    && TimeUtils.dayOf(endTime) >= day) {
+            if (TimeUtils.isInWeek(dates, new long[]{startTime, endTime}, day)) {
                 weekSchedule.getLessonSchedules().add(schedule);
             }
         }

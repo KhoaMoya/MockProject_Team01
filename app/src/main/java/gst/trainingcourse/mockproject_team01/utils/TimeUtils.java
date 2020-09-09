@@ -141,7 +141,29 @@ public class TimeUtils {
     public static int dayOf(long time) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(time);
-        return calendar.get(Calendar.DAY_OF_WEEK);
+        int day = calendar.get(Calendar.DAY_OF_WEEK);
+        if (day == 1) day = 8;
+        return day;
+    }
+
+    public static boolean isInWeek(Date[] weekDates, long[] scheduleTimes, int day) {
+        long startWeek = weekDates[0].getTime();
+        long endWeek = weekDates[1].getTime();
+        long startSchedule = scheduleTimes[0];
+        long endSchedule = scheduleTimes[1];
+
+        if (startSchedule >= startWeek && endSchedule <= endWeek) {
+            return dayOf(startSchedule) <= day && dayOf(endSchedule) >= day;
+        } else {
+            if (startSchedule <= startWeek && endSchedule >= endWeek) {
+                return true;
+            } else if (endSchedule > startWeek && startSchedule < startWeek) {
+                return dayOf(endSchedule) >= day;
+            } else if (startSchedule < endWeek && endSchedule >= endWeek) {
+                return dayOf(startSchedule) <= day;
+            }
+            return false;
+        }
     }
 
 }
