@@ -53,13 +53,28 @@
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/edt_new_name"
-                android:layout_width="220dp"
-                android:layout_height="40dp"
-                android:inputType="textCapSentences"
-                android:textColor="@color/colorBlack"
-                android:textSize="16sp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/edt_subject_name"
+                    android:layout_width="220dp"
+                    android:layout_height="40dp"
+                    android:inputType="textCapSentences"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:id="@+id/img_voice_input"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?actionBarItemBackground"
+                    android:padding="6dp"
+                    android:src="@drawable/ic_voice" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"

@@ -290,6 +290,7 @@ public class EditSchedulePresenter implements EditScheduleContract.presenter {
                     @Override
                     public void onComplete() {
                         mActivity.hideLoading();
+                        mActivity.finish();
                     }
 
                     @Override

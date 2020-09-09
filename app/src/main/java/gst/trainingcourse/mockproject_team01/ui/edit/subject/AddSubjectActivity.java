@@ -34,6 +34,7 @@ public class AddSubjectActivity extends BaseEditSubjectActivity {
         edtSubjectName = findViewById(R.id.edt_subject_name);
         btnOk = findViewById(R.id.btn_ok);
         btnCancel = findViewById(R.id.btn_cancel);
+        imgVoiceInput = findViewById(R.id.img_voice_input);
     }
 
     @Override
