@@ -73,9 +73,6 @@ public class AppDatabaseHelper extends SQLiteOpenHelper {
     }
 
     public ArrayList<LessonSchedule> getSchedules(Date[] dates) {
-        long startWeek = dates[0].getTime();
-        long endWeek = dates[1].getTime();
-
         String sql = "SELECT * FROM " + LESSON_SCHEDULE_TABLE_NAME;
         SQLiteDatabase db = getReadableDatabase();
         ArrayList<LessonSchedule> listSchedule = new ArrayList<>();
